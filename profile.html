@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profile-container">
+    <h1>Profile Settings</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <form class="profile-form" method="POST" action="{{ url_for('profile') }}">
+        <div class="profile-section">
+            <h2>Account Information</h2>
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
+                <button type="button" class="change-btn" onclick="openEmailModal()">Change Email</button>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="save-btn">Save Changes</button>
+        </div>
+    </form>
+
+    <div class="profile-section">
+        <h2>Change Password</h2>
+        <button type="button" class="change-password-btn" onclick="openPasswordModal()">
+            Change Password
+        </button>
+    </div>
+</div>
+
+<!-- Email Change Modal -->
+<div id="emailModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEmailModal()">&times;</span>
+        <h2>Change Email Address</h2>
+        
+        <form id="emailChangeForm">
+            <div class="form-group">
+                <label for="verification_code_email">Verification Code</label>
+                <input type="text" id="verification_code_email" placeholder="Enter 6-digit code" maxlength="6" required>
+                <button type="button" class="send-code-btn" onclick="sendEmailVerificationCode()">Send Code</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="new_email">New Email Address</label>
+                <input type="email" id="new_email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_new_email">Confirm New Email</label>
+                <input type="email" id="confirm_new_email" required>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="closeEmailModal()">Cancel</button>
+                <button type="submit" class="confirm-btn">Update Email</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Password Change Modal -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePasswordModal()">&times;</span>
+        <h2>Change Password</h2>
+        
+        <form id="passwordChangeForm">
+            <div class="form-group">
+                <label for="verification_code_password">Verification Code</label>
+                <input type="text" id="verification_code_password" placeholder="Enter 6-digit code" maxlength="6" required>
+                <button type="button" class="send-code-btn" onclick="sendPasswordVerificationCode()">Send Code</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="new_password">New Password</label>
+                <input type="password" id="new_password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_new_password">Confirm New Password</label>
+                <input type="password" id="confirm_new_password" required>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="closePasswordModal()">Cancel</button>
+                <button type="submit" class="confirm-btn">Update Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+/* ... keep your existing styles ... */
+
+.change-password-btn {
+    padding: 12px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.change-password-btn:hover {
+    background-color: #2980b9;
+}
+
+.profile-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-section h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openEmailModal() {
+    document.getElementById('emailModal').style.display = 'block';
+}
+
+function closeEmailModal() {
+    document.getElementById('emailModal').style.display = 'none';
+}
+
+function openPasswordModal() {
+    document.getElementById('passwordModal').style.display = 'block';
+}
+
+function closePasswordModal() {
+    document.getElementById('passwordModal').style.display = 'none';
+}
+
+function sendEmailVerificationCode() {
+    fetch('/send_verification_code', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            email: '{{ current_user.email }}',
+            type: 'email_change'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Verification code sent to your email!');
+        } else {
+            alert('Failed to send verification code: ' + data.message);
+        }
+    });
+}
+
+function sendPasswordVerificationCode() {
+    fetch('/send_verification_code', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            email: '{{ current_user.email }}',
+            type: 'password_change'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Verification code sent to your email!');
+        } else {
+            alert('Failed to send verification code: ' + data.message);
+        }
+    });
+}
+
+// Email form validation
+document.getElementById('emailChangeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const code = document.getElementById('verification_code_email').value;
+    const newEmail = document.getElementById('new_email').value;
+    const confirmEmail = document.getElementById('confirm_new_email').value;
+    
+    if (newEmail !== confirmEmail) {
+        alert('Email addresses do not match!');
+        return;
+    }
+    
+    fetch('/verify_email_change', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            code: code,
+            new_email: newEmail
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Email updated successfully!');
+            closeEmailModal();
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    });
+});
+
+// Password form validation
+document.getElementById('passwordChangeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const code = document.getElementById('verification_code_password').value;
+    const newPassword = document.getElementById('new_password').value;
+    const confirmPassword = document.getElementById('confirm_new_password').value;
+    
+    if (newPassword !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+    }
+    
+    fetch('/verify_password_change', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            code: code,
+            new_password: newPassword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Password updated successfully!');
+            closePasswordModal();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    });
+});
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const emailModal = document.getElementById('emailModal');
+    const passwordModal = document.getElementById('passwordModal');
+    
+    if (event.target === emailModal) {
+        closeEmailModal();
+    }
+    if (event.target === passwordModal) {
+        closePasswordModal();
+    }
+}
+</script>
+{% endblock %}

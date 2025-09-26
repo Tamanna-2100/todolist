@@ -1,0 +1,44 @@
+<nav class="navbar">
+    <div class="profile-section">
+        <div class="profile-circle" onclick="window.location.href='{{ url_for('profile') }}'">
+            {{ current_user.username[0].upper() }} 
+        </div>
+        <span class="username">{{ current_user.username }}</span>
+    </div>
+
+    <ul class="nav-links">
+        <li>
+            <a href="#" class="add-task-btn" onclick="openTaskModal()">
+                <span class="icon">+</span>
+                <span class="text">Add Task</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('daily_tasks', date_str=current_date.strftime('%Y-%m-%d')) }}">
+                <span class="icon">📅</span>
+                <span class="text">Today</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('schedule_view', view_type='schedule') }}">
+                <span class="icon">📊</span>
+                <span class="text">Schedule</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('calendar') }}">
+                <span class="icon">📅</span>
+                <span class="text">Calendar</span>
+            </a>
+        </li>
+        <!-- Add Logout Button -->
+        <li>
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <span class="icon">🚪</span>
+                <span class="text">Logout</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+{% include 'partials/task_modal.html' %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="calendar-container">
+    <div class="calendar-header">
+        <h1 id="calendar-month">{{ current_month.strftime('%B %Y') }}</h1>
+        <div class="calendar-nav">
+            <button onclick="prevMonth()">←</button>
+            <button onclick="nextMonth()">→</button>
+        </div>
+    </div>
+    
+    <div class="calendar-grid">
+        <div class="calendar-weekdays">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+        </div>
+        
+        <div class="calendar-days" id="calendarDays">
+            <!-- Days will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        renderCalendar(new Date());
+    });
+</script>
+{% endblock %}

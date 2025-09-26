@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="schedule-container">
+    <div class="view-header">
+        <div class="view-nav">
+            <button class="view-btn" onclick="changeView('schedule')">Week</button>
+            <button class="view-btn" onclick="changeView('month')">Month</button>
+            <button class="view-btn active" onclick="changeView('agenda')">Agenda</button>
+        </div>
+        <button class="add-event-btn" onclick="openEventModal()">+ Add Event</button>
+    </div>
+
+    <div class="agenda-header">
+        <h2>Agenda View</h2>
+        <button class="today-btn" onclick="goToToday()">Today</button>
+    </div>
+
+    <div class="agenda-list">
+        {% if events %}
+            {% for event in events %}
+            <div class="agenda-item">
+                <div class="agenda-date">{{ event.date.strftime('%b %d') }}</div>
+                <div class="agenda-time">
+                    {{ event.start_time.strftime('%I:%M %p') }} - {{ event.end_time.strftime('%I:%M %p') }}
+                </div>
+                <div class="agenda-title">{{ event.title }}</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-events">No events scheduled. Add one using the + button!</p>
+        {% endif %}
+    </div>
+</div>
+
+{% include 'partials/event_modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function changeView(viewType) {
+    window.location.href = `/schedule/${viewType}`;
+}
+
+function goToToday() {
+    window.location.href = `/schedule/agenda`;
+}
+</script>
+
+<style>
+.agenda-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+}
+
+.agenda-date {
+    font-weight: bold;
+    min-width: 60px;
+    margin-right: 15px;
+}
+
+.agenda-time {
+    color: #7f8c8d;
+    min-width: 120px;
+    margin-right: 15px;
+}
+
+.agenda-title {
+    flex-grow: 1;
+}
+
+.no-events {
+    text-align: center;
+    padding: 30px;
+    color: #7f8c8d;
+}
+</style>
+{% endblock %}

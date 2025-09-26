@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    {% if not current_user.is_authenticated %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    {% else %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% endif %}
+</head>
+
+<body>
+    <div class="app-container">
+        {% if current_user.is_authenticated %}
+            {% include 'partials/navbar.html' %}
+        {% endif %}
+        
+        <div class="main-content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+
