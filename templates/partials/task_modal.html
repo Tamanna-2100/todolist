@@ -1,0 +1,55 @@
+<div id="taskModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeTaskModal()">&times;</span>
+        <h2>Add New Task</h2>
+        
+        <form action="{{ url_for('add_task') }}" method="POST">
+            <div class="form-group">
+                <label for="content">Task Description</label>
+                <input type="text" id="content" name="content" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date">
+            </div>
+            
+            <div class="form-group">
+                <label for="priority">Priority Level (Optional)</label>
+                <div class="priority-selector">
+                    <div class="priority-option" data-priority="1" onclick="togglePriority(1)">
+                        <div class="priority-dot high-priority"></div>
+                        <span>High (Finish First)</span>
+                    </div>
+                    <div class="priority-option" data-priority="2" onclick="togglePriority(2)">
+                        <div class="priority-dot medium-priority"></div>
+                        <span>Medium (Finish Today)</span>
+                    </div>
+                    <div class="priority-option" data-priority="3" onclick="togglePriority(3)">
+                        <div class="priority-dot low-priority"></div>
+                        <span>Low (Can Wait)</span>
+                    </div>
+                </div>
+                <input type="hidden" id="priority" name="priority" value="">
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="is_recurring" name="is_recurring" onchange="toggleRecurrence()">
+                    Recurring Task
+                </label>
+                <select id="recurrence" name="recurrence" disabled>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="closeTaskModal()">Cancel</button>
+                <button type="submit" class="add-btn">Add Task</button>
+            </div>
+        </form>
+    </div>
+</div>

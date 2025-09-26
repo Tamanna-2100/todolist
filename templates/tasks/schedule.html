@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="schedule-container">
+    <div class="view-header">
+        <div class="view-nav">
+            <button class="view-btn active" onclick="changeView('schedule')">Week</button>
+            <button class="view-btn" onclick="changeView('month')">Month</button>
+            <button class="view-btn" onclick="changeView('agenda')">Agenda</button>
+        </div>
+        <button class="add-event-btn" onclick="openEventModal()">+ Add Event</button>
+    </div>
+
+    <div class="schedule-header">
+        <button class="nav-btn" onclick="navigateWeek(-1)">←</button>
+        <h2>{{ start_date.strftime('%b %d, %Y') }} - {{ end_date.strftime('%b %d, %Y') }}</h2>
+        <button class="nav-btn" onclick="navigateWeek(1)">→</button>
+        <button class="today-btn" onclick="goToToday()">Today</button>
+    </div>
+
+    <div class="schedule-grid">
+        <div class="time-column">
+            <div class="time-header">All Day</div>
+            {% for hour in range(0, 24) %}
+                <div class="time-slot">
+                    {% if hour == 0 %}
+                        12am
+                    {% elif hour < 12 %}
+                        {{ hour }}am
+                    {% elif hour == 12 %}
+                        12pm
+                    {% else %}
+                        {{ hour - 12 }}pm
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="days-container">
+            {% for day in days %}
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">{{ day.name }}</div>
+                    <div class="day-date">{{ day.date.strftime('%m/%d') }}</div>
+                </div>
+                <div class="all-day-events">
+                    {% for event in day.all_day_events %}
+                    <div class="event all-day-event" data-event-id="{{ event.id }}">
+                        {{ event.title }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% for hour in range(0, 24) %}
+                    <div class="time-slot" data-day="{{ day.date.strftime('%Y-%m-%d') }}" data-hour="{{ hour }}" data-minute="0"></div>
+                {% endfor %}
+                
+                {% for event in day.timed_events %}
+                <div class="event timed-event" 
+                     style="top: {{ event.start_position }}px; height: {{ event.duration }}px;"
+                     data-event-id="{{ event.id }}">
+                    <div class="event-time">{{ event.start_time }} - {{ event.end_time }}</div>
+                    <div class="event-title">{{ event.title }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% include 'partials/event_modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentWeekStart = new Date('{{ start_date.isoformat() }}');
+
+function changeView(viewType) {
+    window.location.href = `/schedule/${viewType}?date=${currentWeekStart.toISOString().split('T')[0]}`;
+}
+
+function navigateWeek(direction) {
+    currentWeekStart.setDate(currentWeekStart.getDate() + (direction * 7));
+    changeView('schedule');
+}
+
+function goToToday() {
+    currentWeekStart = new Date();
+    changeView('schedule');
+}
+
+// Event creation when clicking on time slots
+document.querySelectorAll('.time-slot').forEach(slot => {
+    slot.addEventListener('click', function() {
+        const day = this.dataset.day;
+        const hour = parseInt(this.dataset.hour);
+        
+        openEventModal(day, hour, 0);
+    });
+});
+</script>
+{% endblock %}

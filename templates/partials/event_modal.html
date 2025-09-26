@@ -1,0 +1,113 @@
+<div id="eventModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEventModal()">&times;</span>
+        <h2>Add New Event</h2>
+
+        <form id="eventForm" action="{{ url_for('add_event') }}" method="POST">
+            <div class="form-group">
+                <label for="eventTitle">Title</label>
+                <input type="text" id="eventTitle" name="title" required placeholder="Input Event Title...">
+            </div>
+
+            <div class="form-group">
+                <label for="eventDate">Date</label>
+                <input type="date" id="eventDate" name="date" required>
+            </div>
+
+            <div class="time-fields">
+                <div class="form-group">
+                    <label for="eventStartTime">From</label>
+                    <select id="eventStartTime" name="start_time" required>
+                        {% for hour in range(0, 24) %}
+                            {% for minute in ['00', '15', '30', '45'] %}
+                                <option value="{{ '%02d'|format(hour) }}:{{ minute }}">
+                                    {% if hour == 0 %}12:{{ minute }}am
+                                    {% elif hour < 12 %}{{ hour }}:{{ minute }}am
+                                    {% elif hour == 12 %}12:{{ minute }}pm
+                                    {% else %}{{ hour - 12 }}:{{ minute }}pm
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventEndTime">To</label>
+                    <select id="eventEndTime" name="end_time" required>
+                        {% for hour in range(0, 24) %}
+                            {% for minute in ['00', '15', '30', '45'] %}
+                                <option value="{{ '%02d'|format(hour) }}:{{ minute }}">
+                                    {% if hour == 0 %}12:{{ minute }}am
+                                    {% elif hour < 12 %}{{ hour }}:{{ minute }}am
+                                    {% elif hour == 12 %}12:{{ minute }}pm
+                                    {% else %}{{ hour - 12 }}:{{ minute }}pm
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="eventFrequency">Frequency</label>
+                <select id="eventFrequency" name="frequency">
+                    <option value="none">Does not repeat</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekday">Every Weekday (Mon-Fri)</option>
+                    <option value="monday">Every Monday</option>
+                    <option value="tuesday">Every Tuesday</option>
+                    <option value="wednesday">Every Wednesday</option>
+                    <option value="thursday">Every Thursday</option>
+                    <option value="friday">Every Friday</option>
+                    <option value="saturday">Every Saturday</option>
+                    <option value="sunday">Every Sunday</option>
+                    <option value="weekly">Weekly (on this day)</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="closeEventModal()">Cancel</button>
+                <button type="submit" class="add-btn">Add Event</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEventModal(day = null, hour = 9, minute = 0) {
+    const modal = document.getElementById('eventModal');
+    modal.style.display = 'block';
+    
+    // Set default values if provided
+    if (day) {
+        document.getElementById('eventDate').value = day;
+        
+        // Format time to match select options
+        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        document.getElementById('eventStartTime').value = timeString;
+        
+        // Set end time to 1 hour later by default
+        const endHour = (hour + 1) % 24;
+        const endTimeString = `${endHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        document.getElementById('eventEndTime').value = endTimeString;
+    } else {
+        // Set to today and current time
+        const today = new Date();
+        document.getElementById('eventDate').value = today.toISOString().split('T')[0];
+    }
+}
+
+function closeEventModal() {
+    document.getElementById('eventModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('eventModal');
+    if (event.target === modal) {
+        closeEventModal();
+    }
+}
+</script>

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="tasks-container">
+    <h1>Tasks for {{ current_date.strftime('%B %d, %Y') }}</h1>
+    
+    <div class="tasks-list">
+        {% for task in tasks|sort(attribute='priority')|sort(attribute='is_recurring', reverse=true) %}
+        <div class="task-item {% if task.priority == 1 %}high-priority{% elif task.priority == 2 %}medium-priority{% else %}low-priority{% endif %} {% if task.completed %}completed{% endif %}" data-task-id="{{ task.id }}" onclick="toggleTask({{ task.id }})">
+            <div class="task-checkbox">
+                <div class="checkbox-circle"></div>
+            </div>
+            <div class="task-content">{{ task.content }}</div>
+            <div class="task-menu-btn" onclick="showTaskMenu({{ task.id }}, event)">
+                ⋯
+            </div>
+            <div class="task-menu-popup" id="task-menu-{{ task.id }}">
+                <h3>Task Actions</h3>
+                <div class="menu-section">
+                    <h4>Change Priority:</h4>
+                    <div class="menu-priority-options">
+                        <button class="menu-priority-btn high-priority {% if task.priority == 1 %}active{% endif %}" onclick="updateTaskPriority({{ task.id }}, 1)">High</button>
+                        <button class="menu-priority-btn medium-priority {% if task.priority == 2 %}active{% endif %}" onclick="updateTaskPriority({{ task.id }}, 2)">Medium</button>
+                        <button class="menu-priority-btn low-priority {% if task.priority == 3 %}active{% endif %}" onclick="updateTaskPriority({{ task.id }}, 3)">Low</button>
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <button class="menu-action-btn" onclick="moveTaskTomorrow({{ task.id }})">
+                        📅 Move to Tomorrow
+                    </button>
+                </div>
+                <div class="menu-section">
+                    <button class="menu-action-btn delete-btn" onclick="deleteTaskCompletely({{ task.id }})">
+                        🗑️ Delete Task
+                    </button>
+                </div>
+                <button class="menu-close-btn" onclick="hideAllTaskMenus()">Close</button>
+            </div>
+        </div>
+        {% else %}
+        <p class="no-tasks">No tasks for this day. Add one using the + button!</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Task completion toggle
+function toggleTask(taskId) {
+    fetch(`/toggle_task/${taskId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+                if (taskElement) {
+                    taskElement.classList.toggle('completed', data.completed);
+                }
+            }
+        });
+}
+
+function showTaskMenu(taskId, event) {
+    event.stopPropagation();
+    hideAllTaskMenus();
+    const menu = document.getElementById(`task-menu-${taskId}`);
+    menu.style.display = 'block';
+}
+
+function hideAllTaskMenus() {
+    document.querySelectorAll('.task-menu-popup').forEach(menu => {
+        menu.style.display = 'none';
+    });
+}
+
+function updateTaskPriority(taskId, priority) {
+    fetch(`/update_task_priority/${taskId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ priority: priority })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            hideAllTaskMenus();
+            window.location.reload();
+        }
+    });
+}
+
+function moveTaskTomorrow(taskId) {
+    fetch(`/move_task_tomorrow/${taskId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            hideAllTaskMenus();
+            window.location.reload();
+        }
+    });
+}
+
+function deleteTaskCompletely(taskId) {
+    if (confirm('Are you sure you want to delete this task completely? This cannot be undone.')) {
+        fetch(`/delete_task_completely/${taskId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                hideAllTaskMenus();
+                window.location.reload();
+            }
+        });
+    }
+}
+
+// Close menus when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.task-menu-popup') && !e.target.closest('.task-menu-btn')) {
+        hideAllTaskMenus();
+    }
+});
+</script>
+{% endblock %}
