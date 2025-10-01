@@ -148,11 +148,6 @@ def schedule_view(view_type):
                              end_date=end_date,
                              days=days)
     
-    elif view_type == 'month':
-        return render_template('tasks/month.html', 
-                             view_type=view_type,
-                             current_date=current_date)
-    
     elif view_type == 'agenda':
         events = Event.query.filter(
             Event.user_id == current_user.id,
